@@ -15,6 +15,8 @@
 import sys
 import os
 import csv
+import numpy as np
+import pandas as pd
 
 def read_cblm(path):
     print 'read_cblm("' + path + '")'
@@ -40,15 +42,36 @@ def create_code_list(cblm_dir):
 def write_code_matrices(code_matrix_dir):
     print 'write_code_matrices("' + code_matrix_dir + '")'
 
+def build_empty_code_matrix(code_list):
+    """ Construct 2D square matrix with dimensions = length of code_list
+    """
+    dim = len(code_list)
+    temp = [[0 for x in range(dim)] for y in range(dim)] 
+
+    labels = map(str, range(0, dim))
+    return pd.DataFrame(temp, columns=labels, index=labels, dtype=np.int8)
+
 # main:
 cblm_dir = sys.argv[1]
 code_matrix_dir = sys.argv[2]
 
 unique_code_list = sorted(set(create_code_list(cblm_dir)))
-#unique_code_list = create_code_list(cblm_dir)
 #print "\n".join(unique_code_list)
 for i, code in enumerate(unique_code_list):
     print str(i) + ": \"" + code + "\""
+empty_code_matrix = build_empty_code_matrix(unique_code_list)
+#print(np.matrix(empty_code_matrix))
+with pd.option_context('display.max_rows', None, 'display.max_columns', 3):
+     print(empty_code_matrix)
+
+empty_code_matrix.to_csv(path_or_buf = code_matrix_dir + "/empty.csv",
+    sep = '\t')
+
+"""
+for row in empty_code_matrix:
+    for val in row:
+        print '{:2}'.format(val),
+    print
 write_code_matrices(code_matrix_dir)
     
-
+"""
