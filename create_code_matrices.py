@@ -28,11 +28,11 @@ def create_code_list(cblm_dir):
 
     print 'create_code_list("' + cblm_dir + '")'
     cblm_files = []
-    cblm_files += [fn for fn in os.listdir(cblm_dir) if fn.endswith("-CBLM.csv")]
+    cblm_files += [fn for fn in os.listdir(cblm_dir) if fn.endswith('-CBLM.csv')]
     clist = []
     for i, cblm in enumerate(cblm_files):
         cblm_file = cblm_dir + '/' + cblm
-        with open(cblm_file, "rb") as cblm: 
+        with open(cblm_file, 'rb') as cblm: 
             reader = csv.reader(cblm, delimiter = '\t')
             next(reader, None)
             for row in reader: 
@@ -40,9 +40,15 @@ def create_code_list(cblm_dir):
     return clist
 
 def write_code_matrices(code_matrix_dir):
-    print 'write_code_matrices("' + code_matrix_dir + '")'
+    print 'write_code_matrices('" + code_matrix_dir + "')'
 
-def build_empty_code_matrix(code_list):
+def append_legend(file_path, code_list):
+  with open(file_path, 'a') as f:
+    f.write('\n\nLegend:\nID\tCode\n')
+    for i, code in enumerate(code_list):
+        f.write(str(i) + '\t"' + code + '"\n')
+
+def initialize_data_frame(code_list):
     """ Construct 2D square matrix with dimensions = length of code_list
     """
     dim = len(code_list)
@@ -56,19 +62,20 @@ cblm_dir = sys.argv[1]
 code_matrix_dir = sys.argv[2]
 
 unique_code_list = sorted(set(create_code_list(cblm_dir)))
-#print "\n".join(unique_code_list)
+#print '\n'.join(unique_code_list)
 for i, code in enumerate(unique_code_list):
-    print str(i) + ": \"" + code + "\""
-empty_code_matrix = build_empty_code_matrix(unique_code_list)
-#print(np.matrix(empty_code_matrix))
+    print str(i) + ': \"' + code + '\"'
+initialized_data_frame = initialize_data_frame(unique_code_list)
+#print(np.matrix(initialized_data_frame))
 with pd.option_context('display.max_rows', None, 'display.max_columns', 3):
-     print(empty_code_matrix)
+     print(initialized_data_frame)
 
-empty_code_matrix.to_csv(path_or_buf = code_matrix_dir + "/empty.csv",
-    sep = '\t')
+file_path = code_matrix_dir + '/empty.csv'
+initialized_data_frame.to_csv(path_or_buf = file_path, sep = '\t')
+append_legend(file_path, unique_code_list)
 
 """
-for row in empty_code_matrix:
+for row in initialized_data_frame:
     for val in row:
         print '{:2}'.format(val),
     print
