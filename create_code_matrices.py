@@ -67,20 +67,34 @@ def write_code_matrix(file_path, df, code_list):
         for i, code in enumerate(code_list):
             f.write(str(i) + '\t"' + code + '"\n')
 
-def populate_df(cblm, df):
+def populate_df(cblm, df, master_code_list):
+    """ For each row in the cblm, get the code, find out which nodes the current
+        node is linked to, find out the codes for each of those, and add 1 to the
+        values in two locations in the df that corresponds to those two codes.
+    """
     print "populate_df(" + cblm + ",...)"
+    cblm_df = pd.read_csv(cblm, sep='\t')
+    curr_code_list = cblm_df["Code"].values.tolist()
+    #print "type(curr_code_list): " + type(curr_code_list).__name__
+    #print "type(master_code_list): " + type(master_code_list).__name__
+    blm = cblm_df.loc[:,'0':]
+    for i, row in blm.iterrows():
+        print str(i) + ". type(row): " + type(row).__name__
+    #print "type(blm): " + type(blm).__name__
+    popd_df = df.copy()
     """     
     with open(cblm, 'rb') as f:
         reader = csv.reader(f, delimiter = '\t')
         next(reader, None) # Skip headers
         for row in reader:
             print row
-     """           
+    """           
+    return popd_df
 
 def write_code_matrices(cblm_paths, cm_paths, df, code_list):
     for i, cblm in enumerate(cblm_paths):
-        populate_df(cblm, df)
-        write_code_matrix(cm_paths[i], df, code_list)        
+        popd_df = populate_df(cblm, df, code_list)
+        write_code_matrix(cm_paths[i], popd_df, code_list)        
 
 def initialize_data_frame(code_list):
     """ Construct 2D square matrix with dimensions = length of code_list
