@@ -18,9 +18,6 @@ import csv
 import numpy as np
 import pandas as pd
 
-def read_cblm(path):
-    print 'read_cblm("' + path + '")'
-
 def create_code_list(cblm_files):
     """  Read in all the CBLM files in cblm_dir, and return a list of all the
          codes.
