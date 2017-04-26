@@ -73,22 +73,20 @@ def populate_df(cblm, df, master_code_list):
         values in two locations in the df that corresponds to those two codes.
     """
     print "populate_df(" + cblm + ",...)"
+    popd_df = df.copy()
     cblm_df = pd.read_csv(cblm, sep='\t')
     curr_code_list = cblm_df["Code"].values.tolist()
     #print "type(curr_code_list): " + type(curr_code_list).__name__
     #print "type(master_code_list): " + type(master_code_list).__name__
     blm = cblm_df.loc[:,'0':]
     for i, row in blm.iterrows():
-        print str(i) + ". type(row): " + type(row).__name__
+        rlist = row.values.tolist() # want int indices, not nodeID col labels
+        for j, elt in enumerate(rlist):
+            if rlist[j] != 0:
+                print "blm[" +  str(i) + ", " + str(j) + "]: <" + str(rlist[j]) + ">; type: " + type(rlist[j]).__name__ 
+
+        #print str(i) + ". type(row): " + type(row).__name__
     #print "type(blm): " + type(blm).__name__
-    popd_df = df.copy()
-    """     
-    with open(cblm, 'rb') as f:
-        reader = csv.reader(f, delimiter = '\t')
-        next(reader, None) # Skip headers
-        for row in reader:
-            print row
-    """           
     return popd_df
 
 def write_code_matrices(cblm_paths, cm_paths, df, code_list):
