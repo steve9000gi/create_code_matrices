@@ -39,7 +39,7 @@ def get_cblm_file_list(cblm_dir):
     cblm_files += [fn for fn in os.listdir(cblm_dir) if fn.endswith('-CBLM.csv')]
     return cblm_files
 
-def get_cblm_path_list(cblm_dir, cblm_file_list):
+def build_cblm_path_list(cblm_dir, cblm_file_list):
     return [cblm_dir + "/" + filename for filename in cblm_file_list]
 
 def build_cm_paths(cblm_files, cm_dir):
@@ -52,13 +52,13 @@ def build_cm_paths(cblm_files, cm_dir):
             print "build_cm_file_list: invalid CBLM file name" + cblm_fname
     return cm_files
 
-def write_code_matrix(file_path, df, code_list):
-    with open(file_path, 'w') as f:
-        #f.write('Code ID')
-        df.to_csv(path_or_buf = f, sep = '\t')
-        f.write('\n\nLegend:\nID\tCode\n')
-        for i, code in enumerate(code_list):
-            f.write(str(i) + '\t"' + code + '"\n')
+def initialize_data_frame(code_list):
+    """ Construct 2D square data frame with dimensions = length of code_list
+    """
+    dim = len(code_list)
+    temp = [[0 for x in range(dim)] for y in range(dim)] 
+    labels = map(str, range(0, dim))
+    return pd.DataFrame(temp, columns=labels, index=labels, dtype=np.int8)
 
 def populate_df(cblm, df, master_code_list):
     """ For each row in the cblm, get the code, find out which nodes the current
@@ -81,25 +81,25 @@ def populate_df(cblm, df, master_code_list):
                     + ">; type: " + type(rlist[j]).__name__ 
     return popd_df
 
+def write_code_matrix(file_path, df, code_list):
+    with open(file_path, 'w') as f:
+        #f.write('Code ID')
+        df.to_csv(path_or_buf = f, sep = '\t')
+        f.write('\n\nLegend:\nID\tCode\n')
+        for i, code in enumerate(code_list):
+            f.write(str(i) + '\t"' + code + '"\n')
+
 def write_code_matrices(cblm_paths, cm_paths, df, code_list):
     for i, cblm in enumerate(cblm_paths):
         popd_df = populate_df(cblm, df, code_list)
         write_code_matrix(cm_paths[i], popd_df, code_list)        
-
-def initialize_data_frame(code_list):
-    """ Construct 2D square data frame with dimensions = length of code_list
-    """
-    dim = len(code_list)
-    temp = [[0 for x in range(dim)] for y in range(dim)] 
-    labels = map(str, range(0, dim))
-    return pd.DataFrame(temp, columns=labels, index=labels, dtype=np.int8)
 
 # main:
 cblm_dir = sys.argv[1]
 code_matrix_dir = sys.argv[2]
 
 cblm_files = get_cblm_file_list(cblm_dir)
-cblm_paths = get_cblm_path_list(cblm_dir, cblm_files)
+cblm_paths = build_cblm_path_list(cblm_dir, cblm_files)
 print "*** " + str(len(cblm_paths)) + " cblm paths: "
 print '\n'.join(cblm_paths)
 unique_code_list = sorted(set(create_code_list(cblm_paths)))
