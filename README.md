@@ -3,7 +3,7 @@
 <p>
     Usage:<br>
 <ul>
-<li>    ./create_code_matrces.py cblm_dir code_matrix_dir</li>
+<li>    ./create_code_matrices.py cblm_dir code_matrix_dir</li>
 </ul>
     Assumes that the files in the two directories follow this naming
     convention:

@@ -2,7 +2,7 @@
 
 """ create_code_matrices
     Usage:
-    ./create_code_matrces.py cblm_dir code_matrix_dir
+    ./create_code_matrices.py cblm_dir code_matrix_dir
     Assumes that the files in the two directories follow this naming
     convention:
         (cblm) coded binary link matrix: "<name>-CBLM.csv"
