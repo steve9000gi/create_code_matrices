@@ -83,6 +83,10 @@ def populate_df(cblm, df, master_code_list):
         rlist = row.values.tolist() # want int indices, not nodeID col labels
         for j, elt in enumerate(rlist):
             if rlist[j] != 0:
+                x = master_code_list.index(curr_code_list[j])
+                y = master_code_list.index(curr_code_list[i])
+                popd_df.iloc[x, y] += 1
+                #popd_df.iloc[y, x] += 1
                 print "blm[" +  str(i) + ", " + str(j) + "]: <" + str(rlist[j]) + ">; type: " + type(rlist[j]).__name__ 
 
         #print str(i) + ". type(row): " + type(row).__name__
