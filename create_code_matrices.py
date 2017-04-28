@@ -23,11 +23,11 @@ def create_code_list(cblm_files):
          codes.
     """
     clist = []
-    for i, cblm in enumerate(cblm_files):
-        with open(cblm, 'rb') as f: 
-            reader = csv.reader(f, delimiter = '\t')
+    for cblm in cblm_files:
+        with open(cblm, 'rb') as f:
+            reader = csv.reader(f, delimiter='\t')
             next(reader, None) # skip headers
-            for row in reader: 
+            for row in reader:
                 clist.append(row[4])
     return clist
 
@@ -39,7 +39,7 @@ def get_cblm_file_list(cblm_dir):
 def build_cblm_path_list(cblm_dir, cblm_file_list):
     return [cblm_dir + "/" + filename for filename in cblm_file_list]
 
-def build_cm_paths(cblm_files, cm_dir):
+def build_cm_path_list(cblm_files, cm_dir):
     cm_files = []
     for cblm_fname in cblm_files:
         if cblm_fname.endswith("-CBLM.csv"):
@@ -50,58 +50,60 @@ def build_cm_paths(cblm_files, cm_dir):
     return cm_files
 
 def initialize_data_frame(code_list):
-    """ Construct 2D square data frame with dimensions = length of code_list
+    """ Construct 2D square data frame with dimensions = length of code_list and
+        all elements 0.
     """
     dim = len(code_list)
-    temp = [[0 for x in range(dim)] for y in range(dim)] 
+    temp = np.zeros((dim, dim), dtype=np.int8)
     labels = map(str, range(0, dim))
     return pd.DataFrame(temp, columns=labels, index=labels, dtype=np.int8)
 
-def populate_df(cblm, df, master_code_list):
+def populate_df(cblm, df_template, master_code_list):
     """ For each row in the cblm, get the code, find out which nodes the current
         node is linked to, find out the codes for each of those, and add 1 to the
         values in the two locations (we're treating edges as non- or bi-
         directional) in the data frame that corresponds to those two codes.
     """
-    popd_df = df.copy()
+    popd_df = df_template.copy()
     cblm_df = pd.read_csv(cblm, sep='\t')
     curr_code_list = cblm_df["Code"].values.tolist()
-    blm = cblm_df.loc[:,'0':]
+    blm = cblm_df.loc[:, '0':]
     for i, row in blm.iterrows():
         rlist = row.values.tolist() # sequential indices, not nodeID col labels
         for j, elt in enumerate(rlist):
-            if rlist[j] != 0:
+            if elt != 0:
                 x = master_code_list.index(curr_code_list[j])
                 y = master_code_list.index(curr_code_list[i])
                 popd_df.iloc[x, y] += 1
-                print "blm[" +  str(i) + ", " + str(j) + "]: <" + str(rlist[j]) \
-                    + ">; type: " + type(rlist[j]).__name__ 
+                #print "blm[" +  str(i) + ", " + str(j) + "]: <" + str(elt) \
+                #    + ">; type: " + type(elt).__name__
     return popd_df
 
 def write_code_matrix(file_path, df, code_list):
     with open(file_path, 'w') as f:
         #f.write('Code ID')
-        df.to_csv(path_or_buf = f, sep = '\t')
+        df.to_csv(path_or_buf=f, sep='\t')
         f.write('\n\nLegend:\nID\tCode\n')
         for i, code in enumerate(code_list):
             f.write(str(i) + '\t"' + code + '"\n')
 
-def write_code_matrices(cblm_paths, cm_paths, df, code_list):
+def write_code_matrices(cblm_paths, cm_paths, df_template, code_list):
     for i, cblm in enumerate(cblm_paths):
-        popd_df = populate_df(cblm, df, code_list)
-        write_code_matrix(cm_paths[i], popd_df, code_list)        
+        popd_df = populate_df(cblm, df_template, code_list)
+        write_code_matrix(cm_paths[i], popd_df, code_list)
 
-# main:
-cblm_dir = sys.argv[1]
-code_matrix_dir = sys.argv[2]
+def main():
+    cblm_dir = sys.argv[1]
+    code_matrix_dir = sys.argv[2]
+    cblm_file_list = get_cblm_file_list(cblm_dir)
+    cblm_path_list = build_cblm_path_list(cblm_dir, cblm_file_list)
+    print "*** " + str(len(cblm_path_list)) + " cblm paths: "
+    print '\n'.join(cblm_path_list)
+    code_list = sorted(set(create_code_list(cblm_path_list)))
+    #print '\n'.join(code_list)
+    cm_path_list = build_cm_path_list(cblm_file_list, code_matrix_dir)
+    df_template = initialize_data_frame(code_list)
+    write_code_matrices(cblm_path_list, cm_path_list, df_template, code_list)
 
-cblm_files = get_cblm_file_list(cblm_dir)
-cblm_paths = build_cblm_path_list(cblm_dir, cblm_files)
-print "*** " + str(len(cblm_paths)) + " cblm paths: "
-print '\n'.join(cblm_paths)
-unique_code_list = sorted(set(create_code_list(cblm_paths)))
-#print '\n'.join(unique_code_list)
-cm_paths = build_cm_paths(cblm_files, code_matrix_dir)
-df_template = initialize_data_frame(unique_code_list)
-write_code_matrices(cblm_paths, cm_paths, df_template, unique_code_list)
-    
+if __name__ == "__main__":
+    main()
