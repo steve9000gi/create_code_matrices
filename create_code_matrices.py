@@ -54,9 +54,9 @@ def initialize_data_frame(code_list):
         all elements 0.
     """
     dim = len(code_list)
-    temp = np.zeros((dim, dim), dtype=np.int8)
+    temp = np.zeros((dim, dim), dtype=np.int16)
     labels = map(str, range(0, dim))
-    return pd.DataFrame(temp, columns=labels, index=labels, dtype=np.int8)
+    return pd.DataFrame(temp, columns=labels, index=labels, dtype=np.int16)
 
 def populate_df(cblm, df_template, master_code_list):
     """ For each row in the cblm, get the code, find out which nodes the current
