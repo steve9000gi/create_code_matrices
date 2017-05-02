@@ -1,12 +1,19 @@
 #!/usr/bin/env python
 
-""" create_code_matrices
+""" create_code_matrices.py
+
     Usage:
-    ./create_code_matrices.py cblm_dir code_matrix_dir
-    Assumes that the files in the two directories follow this naming
-    convention:
-        (cblm) coded binary link matrix: "<name>-CBLM.csv"
-        code matrix: "<name>-CM.csv"
+        create_code_matrices.py cblm_dir code_matrix_dir
+
+    Args:
+        cblm_dir: A directory of Coded Binary Link Matrix (CBLM) files.
+        code_matrix_dir: A directory (required to exist) where a set of Code
+            Matrix (CM) files is going to be put.
+
+    Requires that the files in the two directories follow these naming
+    conventions:
+        CBLM file: "<name>-CBLM.csv"
+        CM file: "<name>-CM.csv"
     where <name> is a string that may or may not be constructed according to a
     convention defined in
     https://github.com/steve9000gi/extractMaps/blob/master/README.md.
@@ -19,27 +26,56 @@ import numpy as np
 import pandas as pd
 
 def create_code_list(cblm_files):
-    """  Read in all the CBLM files in cblm_dir, and return a list of all the
-         codes.
+    """ Create a list of all the codes in a set of CBLM files.
+
+    Arg:
+        cblm_files: List of paths to a set of CBLM files.
+
+    Returns:
+        A list of all the codes in those files (duplicates are not only ok but
+       expected)..
     """
     clist = []
     for cblm in cblm_files:
-        with open(cblm, 'rb') as f:
-            reader = csv.reader(f, delimiter='\t')
+        with open(cblm, 'rb') as file_obj:
+            reader = csv.reader(file_obj, delimiter='\t')
             next(reader, None) # skip headers
             for row in reader:
                 clist.append(row[4])
     return clist
 
 def get_cblm_file_list(cblm_dir):
+    """ Get a list of all the CBLM files in a directory.
+
+    Arg:
+        cblm_dir: the path to a directory that contains CBLM files.
+
+    Returns:
+        a list of CBLM files in that directory.
+    """
+
     cblm_files = []
     cblm_files += [fn for fn in os.listdir(cblm_dir) if fn.endswith('-CBLM.csv')]
     return cblm_files
 
 def build_cblm_path_list(cblm_dir, cblm_file_list):
+    """ Builds a list of full paths to a set of CBLM files.
+    """
     return [cblm_dir + "/" + filename for filename in cblm_file_list]
 
 def build_cm_path_list(cblm_files, cm_dir):
+    """ Builds a list of full paths to a set of CM files. An error message is
+        printed to stdout for any file that doesn't follow the CM file naming
+        convention.
+
+    Args:
+       cblm_files: A list of CBLM filenames, used as the basis for creating CM
+           filenames.
+       cm_dir: The path of a directory into which CM files are intended to go.
+
+    Returns:
+       A list of full paths to CM files.
+    """
     cm_files = []
     for cblm_fname in cblm_files:
         if cblm_fname.endswith("-CBLM.csv"):
@@ -60,45 +96,82 @@ def initialize_data_frame(code_list):
 
 def populate_df(cblm, df_template, master_code_list):
     """ For each row in the cblm, get the code, find out which nodes the current
-        node is linked to, find out the codes for each of those, and add 1 to the
-        values in the two locations (we're treating edges as non- or bi-
+        node is linked to, find out the codes for each of those, and add 1 to
+        the values in the two locations (we're treating edges as non- or bi-
         directional) in the data frame that corresponds to those two codes.
+
+    Args:
+        cblm: The full path to a CBLM file that's used as the source for the
+            node names and codes that will be used to populate a particular
+            Pandas DataFrame.
+        df_template: A Pandas DataFrame that's the right size, has the correct
+            labels for both rows and columns, but all of whose elements are
+            integers = 0.
+        master_code_list: A list of all the unique codes in the originating set
+            of CBLM files.
+
+    Returns:
+        A Pandas DataFrame that represents the connectivity between nodes in an
+        SSM, where node names have been replaced by the codes associated with
+        them in the file represented by the cblm arg.
     """
     popd_df = df_template.copy()
     cblm_df = pd.read_csv(cblm, sep='\t')
     curr_code_list = cblm_df["Code"].values.tolist()
-    blm = cblm_df.loc[:, '0':]
+    zero_loc = cblm_df.columns.get_loc('0')
+    blm = cblm_df.ix[:, zero_loc:]
     for i, row in blm.iterrows():
         rlist = row.values.tolist() # sequential indices, not nodeID col labels
         for j, elt in enumerate(rlist):
             if elt != 0:
-                x = master_code_list.index(curr_code_list[j])
-                y = master_code_list.index(curr_code_list[i])
-                popd_df.iloc[x, y] += 1
+                row = master_code_list.index(curr_code_list[j])
+                col = master_code_list.index(curr_code_list[i])
+                popd_df.iloc[row, col] += 1
                 #print "blm[" +  str(i) + ", " + str(j) + "]: <" + str(elt) \
                 #    + ">; type: " + type(elt).__name__
     return popd_df
 
-def write_code_matrix(file_path, df, code_list):
-    with open(file_path, 'w') as f:
+def write_code_matrix(file_path, populated_df, code_list):
+    """ Write the contents of populated data frame populated_df, followed by a
+        legend comprised of the codes in code_list, each associated with the
+        integer used to label that code's column and row, to file at location
+        file_path. Assumes that those row and column labels are '0' to length of
+        code_list - 1.
+   """
+    with open(file_path, 'w') as file_obj:
         #f.write('Code ID')
-        df.to_csv(path_or_buf=f, sep='\t')
-        f.write('\n\nLegend:\nID\tCode\n')
+        populated_df.to_csv(path_or_buf=file_obj, sep='\t')
+        file_obj.write('\n\nLegend:\nID\tCode\n')
         for i, code in enumerate(code_list):
-            f.write(str(i) + '\t"' + code + '"\n')
+            file_obj.write(str(i) + '\t"' + code + '"\n')
 
 def write_code_matrices(cblm_paths, cm_paths, df_template, code_list):
-    for i, cblm in enumerate(cblm_paths):
-        popd_df = populate_df(cblm, df_template, code_list)
+    """ Write out a set of CM files, each of which corresponds to one of the
+        CBLM files represented by a set of paths to CBLM files. Also sum all
+        the CMs and write the results to the same directory.
+    """
+    sum_df = df_template.copy()
+    print "id of sum_df: {0}".format(id(sum_df))
+    for i, cblm_path in enumerate(cblm_paths):
+        popd_df = populate_df(cblm_path, df_template, code_list)
         write_code_matrix(cm_paths[i], popd_df, code_list)
+        sum_df = sum_df.add(popd_df, fill_value=-1)
+        print str(i) + ': ' + cm_paths[i]
+        print "max popd_df: " + str(popd_df.values.max())
+        print "max sum_df: " + str(sum_df.values.max())
+    if cm_paths:
+        write_code_matrix(os.path.dirname(cm_paths[0]) + "/sum-CM.csv",
+                          sum_df, code_list)
 
 def main():
+    """ main, ok pylint!
+    """
     cblm_dir = sys.argv[1]
     code_matrix_dir = sys.argv[2]
     cblm_file_list = get_cblm_file_list(cblm_dir)
     cblm_path_list = build_cblm_path_list(cblm_dir, cblm_file_list)
-    print "*** " + str(len(cblm_path_list)) + " cblm paths: "
-    print '\n'.join(cblm_path_list)
+    #print "*** " + str(len(cblm_path_list)) + " cblm paths: "
+    #print '\n'.join(cblm_path_list)
     code_list = sorted(set(create_code_list(cblm_path_list)))
     #print '\n'.join(code_list)
     cm_path_list = build_cm_path_list(cblm_file_list, code_matrix_dir)
