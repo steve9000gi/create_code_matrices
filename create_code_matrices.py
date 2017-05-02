@@ -127,8 +127,6 @@ def populate_df(cblm, df_template, master_code_list):
                 row = master_code_list.index(curr_code_list[j])
                 col = master_code_list.index(curr_code_list[i])
                 popd_df.iloc[row, col] += 1
-                #print "blm[" +  str(i) + ", " + str(j) + "]: <" + str(elt) \
-                #    + ">; type: " + type(elt).__name__
     return popd_df
 
 def write_code_matrix(file_path, populated_df, code_list):
@@ -137,7 +135,19 @@ def write_code_matrix(file_path, populated_df, code_list):
         integer used to label that code's column and row, to file at location
         file_path. Assumes that those row and column labels are '0' to length of
         code_list - 1.
-   """
+
+    Args:
+        file_path: The full path to a file to which the code matrix is to be
+            written.
+        populated_df: A Pandas DataFrame that has been populated by integer 
+            values representing links between nodes according to the codes 
+            assigned to those nodes.
+        code_list: A list of all the codes represented in populated_df, and
+            in the same order.
+
+    Returns: 
+        None    
+    """
     with open(file_path, 'w') as file_obj:
         #f.write('Code ID')
         populated_df.to_csv(path_or_buf=file_obj, sep='\t')
@@ -149,31 +159,34 @@ def write_code_matrices(cblm_paths, cm_paths, df_template, code_list):
     """ Write out a set of CM files, each of which corresponds to one of the
         CBLM files represented by a set of paths to CBLM files. Also sum all
         the CMs and write the results to the same directory.
+
+    Args:
+        cblm_paths: A list of the full paths to a set of CBLM files.
+        cm_paths: A list of full paths to which CM files are to be written. 
+        df_template: A Pandas DataFrame formatted just like the final CM files
+            except all the element values are 0.
+        code_list: A list of all the codes that are to be immortalized in this
+            collection of CM files.
+
+    Returns:
+        None
     """
     sum_df = df_template.copy()
-    print "id of sum_df: {0}".format(id(sum_df))
     for i, cblm_path in enumerate(cblm_paths):
         popd_df = populate_df(cblm_path, df_template, code_list)
         write_code_matrix(cm_paths[i], popd_df, code_list)
         sum_df = sum_df.add(popd_df, fill_value=-1)
         print str(i) + ': ' + cm_paths[i]
-        print "max popd_df: " + str(popd_df.values.max())
-        print "max sum_df: " + str(sum_df.values.max())
     if cm_paths:
         write_code_matrix(os.path.dirname(cm_paths[0]) + "/sum-CM.csv",
                           sum_df, code_list)
 
 def main():
-    """ main, ok pylint!
-    """
     cblm_dir = sys.argv[1]
     code_matrix_dir = sys.argv[2]
     cblm_file_list = get_cblm_file_list(cblm_dir)
     cblm_path_list = build_cblm_path_list(cblm_dir, cblm_file_list)
-    #print "*** " + str(len(cblm_path_list)) + " cblm paths: "
-    #print '\n'.join(cblm_path_list)
     code_list = sorted(set(create_code_list(cblm_path_list)))
-    #print '\n'.join(code_list)
     cm_path_list = build_cm_path_list(cblm_file_list, code_matrix_dir)
     df_template = initialize_data_frame(code_list)
     write_code_matrices(cblm_path_list, cm_path_list, df_template, code_list)
