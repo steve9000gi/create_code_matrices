@@ -2,8 +2,8 @@
 
 """ create_code_presence_matrix.py
 
-    Generate a matrix where the column names are the names of all the System
-    Support Map files in a project, and the row names are all the "codes" 
+    Generate a matrix where the row names are the names of all the System
+    Support Map files in a project, and the column names are all the "codes" 
     (node text category names) for that project, and each element is the number
     of times a code appears in the corresponding file. 
 
@@ -27,7 +27,27 @@ import os
 import csv
 import numpy as np
 import pandas as pd
-from create_code_matrices import get_cblm_file_list, build_cblm_path_list, create_code_list
+from create_code_matrices import get_cblm_file_list, build_cblm_path_list, \
+    create_code_list
+
+def generate_row_names(file_list):
+    """ Assumes that file_list is a list of CBLM files. Strip off the file-
+        type-specific characters at the end of each and leave the substrings
+        uniquely identifying and linking each file sequence ([SSM]".json" ->
+        "-BLM.csv" -> "-CBLM.csv" -> "-CM.csv")within the current project.
+    """
+    return file_list
+
+def initialize_data_frame(file_list, code_list):
+    """ Construct 2D data frame where rows are system support map file names
+        and columns are codes; all elements 0.
+    """
+    row_names = generate_row_names(file_list)
+    n_rows = len(row_names)
+    n_cols = len(code_list)
+    temp = np.zeros((n_rows, n_cols), dtype=np.int16)
+    return pd.DataFrame(temp, columns=code_list, index=row_names,
+        dtype=np.int16)
 
 def main():
     cblm_dir = sys.argv[1]
@@ -36,13 +56,12 @@ def main():
     cblm_path_list = build_cblm_path_list(cblm_dir, cblm_file_list)
     code_list = sorted(set(create_code_list(cblm_path_list)))
     
-    # print "type(cblm_file_list): " + type(cblm_file_list).__name__
-    # print "type(cblm_path_list): " + type(cblm_path_list).__name__
-    # print "type(code_list): " + type(code_list).__name__
+    #print "cblm_file_list: " + str(cblm_file_list)
+    #print "cblm_path_list: " + str(cblm_path_list)
+    #print "code_list: " + str(code_list)
 
-    print "cblm_file_list: " + str(cblm_file_list)
-    print "cblm_path_list: " + str(cblm_path_list)
-    print "code_list: " + str(code_list)
+    df = initialize_data_frame(cblm_file_list, code_list)
+    print df.to_string()
 
 if __name__ == "__main__":
     main()
