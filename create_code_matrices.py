@@ -139,14 +139,14 @@ def write_code_matrix(file_path, populated_df, code_list):
     Args:
         file_path: The full path to a file to which the code matrix is to be
             written.
-        populated_df: A Pandas DataFrame that has been populated by integer 
-            values representing links between nodes according to the codes 
+        populated_df: A Pandas DataFrame that has been populated by integer
+            values representing links between nodes according to the codes
             assigned to those nodes.
         code_list: A list of all the codes represented in populated_df, and
             in the same order.
 
-    Returns: 
-        None    
+    Returns:
+        None
     """
     with open(file_path, 'w') as file_obj:
         #f.write('Code ID')
@@ -162,7 +162,7 @@ def write_code_matrices(cblm_paths, cm_paths, df_template, code_list):
 
     Args:
         cblm_paths: A list of the full paths to a set of CBLM files.
-        cm_paths: A list of full paths to which CM files are to be written. 
+        cm_paths: A list of full paths to which CM files are to be written.
         df_template: A Pandas DataFrame formatted just like the final CM files
             except all the element values are 0.
         code_list: A list of all the codes that are to be immortalized in this
