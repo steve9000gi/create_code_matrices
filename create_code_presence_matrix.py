@@ -57,6 +57,35 @@ def initialize_data_frame(file_list, code_list):
     return pd.DataFrame(temp, columns=code_list, index=row_names,
         dtype=np.int16)
 
+def populate_df(cblms, codes, df_template):
+    """ For each Coded Binary Link Matrix (CBLM) file in cblms, find out how
+        often each code is used, and put that number in the element with row
+        corresponding to the cblm currently under consideration and with column
+        corresponding to that code.
+
+    Args:
+        cblms: A list of full paths to a set of CBLM files.
+            the codes that will be used to populate a particular
+            Pandas DataFrame.
+        codes: A list of all the unique codes in the originating set
+            of CBLM files.
+        df_template: A Pandas DataFrame that's the right size, has the correct
+            labels for both rows and columns, but all of whose elements are
+            integers = 0.
+
+    Returns:
+        A Pandas DataFrame that represents how many times each code is used in
+        each file.
+"""
+    df = df_template.copy()
+    for row, cblm in enumerate(cblms):
+        cblm_df = pd.read_csv(cblm, sep='\t')
+        curr_code_list = cblm_df["Code"].values.tolist()
+        #print str(row) + ": " + str(curr_code_list) + "\n"
+        for col, code in enumerate(curr_code_list):
+            df.iloc[row, df.columns.get_loc(code)] += 1
+    return df
+
 def write_matrix(df, output_path):
     """ Write contents of dataFrame df to output_path/CodePresenceMatrix.csv.
     """
@@ -76,7 +105,8 @@ def main():
     #print "cblm_path_list: " + str(cblm_path_list)
     #print "code_list: " + str(code_list)
 
-    df = initialize_data_frame(cblm_file_list, code_list)
+    df_template = initialize_data_frame(cblm_file_list, code_list)
+    df = populate_df(cblm_path_list, code_list, df_template)
     #print df.to_string()
     write_matrix(df, output_path)
     print "Done."
