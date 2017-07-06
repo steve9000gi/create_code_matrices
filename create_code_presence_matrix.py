@@ -30,13 +30,21 @@ import pandas as pd
 from create_code_matrices import get_cblm_file_list, build_cblm_path_list, \
     create_code_list
 
+def rchop(thestring, ending):
+    """ https://stackoverflow.com/questions/3663450/python-remove-substring-only-at-the-end-of-string
+    """
+    if thestring.endswith(ending):
+        return thestring[:-len(ending)]
+    return thestring
+
 def generate_row_names(file_list):
     """ Assumes that file_list is a list of CBLM files. Strip off the file-
         type-specific characters at the end of each and leave the substrings
-        uniquely identifying and linking each file sequence ([SSM]".json" ->
-        "-BLM.csv" -> "-CBLM.csv" -> "-CM.csv")within the current project.
+        uniquely identifying and linking each file sequence (i.e., <name> in
+        "<name>[SSM].json" -> "<name>-BLM.csv" -> "<name>-CBLM.csv" ->
+        "<name>-CM.csv") within the current project.
     """
-    return file_list
+    return [rchop(file_name, "-CBLM.csv") for file_name in file_list]
 
 def initialize_data_frame(file_list, code_list):
     """ Construct 2D data frame where rows are system support map file names
@@ -49,9 +57,17 @@ def initialize_data_frame(file_list, code_list):
     return pd.DataFrame(temp, columns=code_list, index=row_names,
         dtype=np.int16)
 
+def write_matrix(df, output_path):
+    """ Write contents of dataFrame df to output_path/CodePresenceMatrix.csv.
+    """
+    #  2do: Handle possible trailing "/" in output_path.
+    file_path = output_path + "/CodePresenceMatrix.csv"
+    with open(file_path, 'w') as file_obj:
+        df.to_csv(path_or_buf=file_obj, sep='\t')
+
 def main():
     cblm_dir = sys.argv[1]
-    code_matrix_dir = sys.argv[2]
+    output_path = sys.argv[2]
     cblm_file_list = get_cblm_file_list(cblm_dir)
     cblm_path_list = build_cblm_path_list(cblm_dir, cblm_file_list)
     code_list = sorted(set(create_code_list(cblm_path_list)))
@@ -61,7 +77,9 @@ def main():
     #print "code_list: " + str(code_list)
 
     df = initialize_data_frame(cblm_file_list, code_list)
-    print df.to_string()
+    #print df.to_string()
+    write_matrix(df, output_path)
+    print "Done."
 
 if __name__ == "__main__":
     main()
