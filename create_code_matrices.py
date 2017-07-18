@@ -19,11 +19,13 @@
     https://github.com/steve9000gi/extractMaps/blob/master/README.md.
 """
 
+
 import sys
 import os
 import csv
 import numpy as np
 import pandas as pd
+
 
 def create_code_list(cblm_files):
     """ Create a list of all the codes in a set of CBLM files.
@@ -44,6 +46,7 @@ def create_code_list(cblm_files):
                 clist.append(row[4])
     return clist
 
+
 def get_cblm_file_list(cblm_dir):
     """ Get a list of all the CBLM files in a directory.
 
@@ -58,10 +61,12 @@ def get_cblm_file_list(cblm_dir):
     cblm_files += [fn for fn in os.listdir(cblm_dir) if fn.endswith('-CBLM.csv')]
     return cblm_files
 
+
 def build_cblm_path_list(cblm_dir, cblm_file_list):
     """ Builds a list of full paths to a set of CBLM files.
     """
     return [cblm_dir + "/" + filename for filename in cblm_file_list]
+
 
 def build_cm_path_list(cblm_files, cm_dir):
     """ Builds a list of full paths to a set of CM files. An error message is
@@ -85,6 +90,7 @@ def build_cm_path_list(cblm_files, cm_dir):
             print "build_cm_file_list: invalid CBLM file name" + cblm_fname
     return cm_files
 
+
 def initialize_data_frame(code_list):
     """ Construct 2D square data frame with dimensions = length of code_list and
         all elements 0.
@@ -93,6 +99,7 @@ def initialize_data_frame(code_list):
     temp = np.zeros((dim, dim), dtype=np.int16)
     labels = map(str, range(0, dim))
     return pd.DataFrame(temp, columns=labels, index=labels, dtype=np.int16)
+
 
 def populate_df(cblm, df_template, master_code_list):
     """ For each row in the cblm, get the code, find out which nodes the current
@@ -118,8 +125,7 @@ def populate_df(cblm, df_template, master_code_list):
     popd_df = df_template.copy()
     cblm_df = pd.read_csv(cblm, sep='\t')
     curr_code_list = cblm_df["Code"].values.tolist()
-    zero_loc = cblm_df.columns.get_loc('0')
-    blm = cblm_df.ix[:, zero_loc:]
+    blm = cblm_df.ix[:, 7:] # from first column of adjacency matrix ("blm")
     for i, row in blm.iterrows():
         rlist = row.values.tolist() # sequential indices, not nodeID col labels
         for j, elt in enumerate(rlist):
@@ -128,6 +134,7 @@ def populate_df(cblm, df_template, master_code_list):
                 col = master_code_list.index(curr_code_list[i])
                 popd_df.iloc[row, col] += 1
     return popd_df
+
 
 def write_code_matrix(file_path, populated_df, code_list):
     """ Write the contents of populated data frame populated_df, followed by a
@@ -155,6 +162,7 @@ def write_code_matrix(file_path, populated_df, code_list):
         for i, code in enumerate(code_list):
             file_obj.write(str(i) + '\t"' + code + '"\n')
 
+
 def write_code_matrices(cblm_paths, cm_paths, df_template, code_list):
     """ Write out a set of CM files, each of which corresponds to one of the
         CBLM files represented by a set of paths to CBLM files. Also sum all
@@ -176,10 +184,11 @@ def write_code_matrices(cblm_paths, cm_paths, df_template, code_list):
         popd_df = populate_df(cblm_path, df_template, code_list)
         write_code_matrix(cm_paths[i], popd_df, code_list)
         sum_df = sum_df.add(popd_df, fill_value=-1)
-        print str(i) + ': ' + cm_paths[i]
+        print str(i) + ': ' + cblm_path + ' -> ' + cm_paths[i]
     if cm_paths:
         write_code_matrix(os.path.dirname(cm_paths[0]) + "/sum-CM.csv",
                           sum_df, code_list)
+
 
 def main():
     cblm_dir = sys.argv[1]
@@ -190,6 +199,7 @@ def main():
     cm_path_list = build_cm_path_list(cblm_file_list, code_matrix_dir)
     df_template = initialize_data_frame(code_list)
     write_code_matrices(cblm_path_list, cm_path_list, df_template, code_list)
+
 
 if __name__ == "__main__":
     main()
