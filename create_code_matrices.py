@@ -97,8 +97,8 @@ def initialize_data_frame(code_list):
     """
     dim = len(code_list)
     temp = np.zeros((dim, dim), dtype=np.int16)
-    labels = map(str, range(0, dim))
-    return pd.DataFrame(temp, columns=labels, index=labels, dtype=np.int16)
+    return pd.DataFrame(temp, columns=code_list, index=code_list,
+	dtype=np.int16)
 
 
 def populate_df(cblm, df_template, master_code_list):
@@ -137,11 +137,9 @@ def populate_df(cblm, df_template, master_code_list):
 
 
 def write_code_matrix(file_path, populated_df, code_list):
-    """ Write the contents of populated data frame populated_df, followed by a
-        legend comprised of the codes in code_list, each associated with the
-        integer used to label that code's column and row, to file at location
-        file_path. Assumes that those row and column labels are '0' to length of
-        code_list - 1.
+    """ Write the contents of populated data frame populated_df to file at
+        location file_path. Assumes that those row and column labels are the
+	appropriate codes.
 
     Args:
         file_path: The full path to a file to which the code matrix is to be
@@ -156,11 +154,7 @@ def write_code_matrix(file_path, populated_df, code_list):
         None
     """
     with open(file_path, 'w') as file_obj:
-        #f.write('Code ID')
         populated_df.to_csv(path_or_buf=file_obj, sep='\t')
-        file_obj.write('\n\nLegend:\nID\tCode\n')
-        for i, code in enumerate(code_list):
-            file_obj.write(str(i) + '\t"' + code + '"\n')
 
 
 def write_code_matrices(cblm_paths, cm_paths, df_template, code_list):
