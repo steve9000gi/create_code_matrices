@@ -2,13 +2,16 @@
 
 """ matrices_to_3cols.py
 
-    reads in a code matrix. outputs a 2D array, arranged in three columns,
-    thusly:
+    Reads in a directory of code matrices. outputs a directory of "3cols," 2D
+    arrays, each arranged in three columns, thusly:
     
     from    to   value
 
     where "from" and "to" are codes, and "value" is the number of edges in the
     originating set of SSMs that go from "from" to "to."
+
+    Usage:
+        CMs_to_3cols.py cm_dir output_dir
 
 """
 import sys
