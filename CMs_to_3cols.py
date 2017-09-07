@@ -13,6 +13,17 @@
     Usage:
         CMs_to_3cols.py cm_dir output_dir
 
+    Args:
+        cm_dir: A directory of Code Matrix (CM) files.
+        output_dir: A directory (required to exist) that is the intended target
+            location for a set of "3col" files.
+
+    Requires that the files in the two directories follow these naming
+    conventions:
+        CM file: "<name>-CM.csv"
+        3col file: "<name>-3col.csv"
+ 
+
 """
 import sys
 import os
