@@ -22,9 +22,9 @@
     conventions:
         CM file: "<name>-CM.csv"
         3col file: "<name>-3col.csv"
- 
-
 """
+
+
 import sys
 import os
 import csv
@@ -33,14 +33,14 @@ import pandas as pd
 
 
 def get_file_list(dir, suffix):
-    """ Get a list of all the files in a directory ending in "suffix".
+    """ Get a list of all the files (in "dir") whose names end in "suffix."
 
-    Arg:
-        dir: the path to a directory that contains CBLM files.
+    Args:
+        dir: the path to a directory.
         suffix: the ending substring used for selecting files.
 
     Returns:
-        a list of files in dir ending with suffix..
+        a list of files in "dir" ending with "suffix."
     """
 
     files = []
@@ -75,7 +75,6 @@ def build_3col_path_list(cm_files, out_dir):
         else:
             print "build_3col_path_list: invalid CM file name " + cm_fname
     return out_files
-
 
 
 def print_list(list, title):
