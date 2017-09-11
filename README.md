@@ -26,6 +26,7 @@
     of times a code appears in the corresponding file.<br><br>
 
     Usage:<br>
+</p>
 <ul>
 <li>create_code_presence_matrix.py cblm_dir output_dir</li>
 </ul>
