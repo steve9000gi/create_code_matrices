@@ -1,4 +1,4 @@
-<h3>create_code_matrices</h3>
+<h3>create_code_matrices.py</h3>
 
 Usage:
 * create_code_matrices.py cblm_dir code_matrix_dir
