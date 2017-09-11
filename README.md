@@ -29,7 +29,7 @@ where *name* is a string that may or may not be constructed according to a conve
 
 <h3>matrices_to_3cols.py</h3>
 
-Reads in a directory of code matrices. outputs a directory of "3cols," 2D arrays, each arranged in three columns, thusly:
+Reads in a directory of code matrices (CMs). Outputs a directory of "3cols," which are 2D arrays, each arranged in three columns, thusly:
 
 <table>
 <tr>
@@ -39,7 +39,7 @@ Reads in a directory of code matrices. outputs a directory of "3cols," 2D arrays
 </tr>
 </table>
 
-where "from" and "to" are codes, and "value" is the number of edges in the originating set of SSMs that go from "from" to "to."
+where "from" and "to" are codes, and "value" is the number of edges in the originating set of SSMs that go from "from" to "to." In each 3col file output there is a row for each element in its corresponding CM.
 
 Usage:
 * CMs_to_3cols.py cm_dir output_dir
