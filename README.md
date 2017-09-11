@@ -39,7 +39,7 @@
 
     Requires that the files in cblm_dir follow this naming convention:
 <ul>
-<li>CBLM file: "<em>name</em>-CBLM.csv"<\li>
+<li>CBLM file: "<em>name</em>-CBLM.csv"</li>
     where <em>name</em> is a string that may or may not be constructed according to a convention defined in https://github.com/steve9000gi/extractMaps/blob/master/README.md.
 </p>
 
