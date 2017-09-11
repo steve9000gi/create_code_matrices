@@ -4,7 +4,7 @@
 
     Reads in a directory of code matrices. outputs a directory of "3cols," 2D
     arrays, each arranged in three columns, thusly:
-    
+
     from    to   value
 
     where "from" and "to" are codes, and "value" is the number of edges in the
@@ -87,6 +87,16 @@ def print_list(list, title):
 
 
 def convert_CM_to_3col(cm_path, outfile_path):
+    """ Reads a code matrix (CM) file and creates an equivalent 3col file.
+
+      Args:
+          cm_path: Full path to a CM file.
+          outfile_path: Full path to which the equivalent 3col file is to be
+              written.
+
+      Returns:
+          None
+    """
     cm = pd.read_csv(cm_path, delimiter="\t", index_col=0)
     outfile = open(outfile_path, "w")
     outfile.write("From:\tTo:\tValue:\n")
@@ -98,7 +108,7 @@ def convert_CM_to_3col(cm_path, outfile_path):
 
 def convert_CMs_to_3cols(cm_paths, out_paths):
     """ Write out a set of 3col files, each of which corresponds to one of the
-        CM files represented by a set of paths to CM files. 
+        CM files represented by a set of paths to CM files.
 
     Args:
         cm_paths: A list of the full paths to a set of CM files.
@@ -116,10 +126,10 @@ def main():
     cm_dir = sys.argv[1]
     out_dir = sys.argv[2]
     cm_file_list = get_file_list(cm_dir, "-CM.csv")
-    cm_path_list = build_path_list(cm_dir, cm_file_list)    
+    cm_path_list = build_path_list(cm_dir, cm_file_list)
     out_path_list = build_3col_path_list(cm_file_list, out_dir)
     convert_CMs_to_3cols(cm_path_list, out_path_list)
 
 
 if __name__ == "__main__":
-      main()
+    main()
