@@ -15,7 +15,7 @@
         output_dir: A directory (required to exist) where the code presence
             matrix is going to be put.
 
-    Requires that the files in cblm_dir follow these naming conventions:
+    Requires that the files in cblm_dir follow this naming convention:
         CBLM file: "<name>-CBLM.csv"
     where <name> is a string that may or may not be constructed according to a
     convention defined in
