@@ -1,14 +1,13 @@
 <h3>create_code_matrices</h3>
 
-    Usage:<br>
+Usage:
 * ./create_code_matrices.py cblm_dir code_matrix_dir
-    Assumes that the files in the two directories follow this naming
-    convention:
+
+Assumes that the files in the two directories follow this naming convention:
 * (cblm) coded binary link matrix: "<em>name</em>-CBLM.csv"
 * code matrix: "*name*-CM.csv"
-    where *name> is a string that may or may not be constructed according to a
-    convention defined in
-    https://github.com/steve9000gi/extractMaps/blob/master/README.md.
+
+where *name* is a string that may or may not be constructed according to a convention defined in https://github.com/steve9000gi/extractMaps/blob/master/README.md.
 
 
 <h3>create_code_presence_matrix.py</h3>
