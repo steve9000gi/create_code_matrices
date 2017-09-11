@@ -27,7 +27,7 @@ Requires that the files in cblm_dir follow this naming convention:
 
 where *name* is a string that may or may not be constructed according to a convention defined in https://github.com/steve9000gi/extractMaps/blob/master/README.md.
 
-<h3>matrices_to_3cols.py</h3>
+<h3>CMs_to_3cols.py</h3>
 
 Reads in a directory of code matrices (CMs). Outputs a directory of "3cols," which are 2D arrays, each arranged in three columns, thusly:
 
