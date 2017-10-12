@@ -18,7 +18,7 @@
         cm_dir: A directory of Code Matrix (CM) files.
         output_dir: A directory (required to exist) that is the intended target
             location for a set of "3cols" files.
-        min_val (optional): the minimum value for the int in column 3 below 
+        min_val (optional): the minimum value for the int in column 3 below
             which a row will not be printed. Defaults to 0 (all rows printed).
 
     Requires that the files in the two directories follow these naming
@@ -76,8 +76,8 @@ def build_3cols_path_list(cm_files, out_dir, min_val):
     out_files = []
     for cm_fname in cm_files:
         if cm_fname.endswith("-CM.csv"):
-            out_path = (out_dir + "/" + cm_fname[:-6] + "3cols_get"
-                + str(min_val) + ".csv")
+            out_path = (out_dir + "/" + cm_fname[:-6] + "3cols_get" +
+                        str(min_val) + ".csv")
             out_files.append(out_path)
         else:
             print "build_3cols_path_list: invalid CM file name " + cm_fname
@@ -101,7 +101,7 @@ def convert_CM_to_3cols(cm_path, outfile_path, min_val):
             outfile_path: Full path to which the equivalent 3cols file is to
                 be written.
             min_val: the minimum value for the int in the third column. If
-                "val" < min_val the line is not printed. 
+                "val" < min_val the line is not printed.
 
       Returns:
           None
@@ -112,8 +112,8 @@ def convert_CM_to_3cols(cm_path, outfile_path, min_val):
     for row_name, row in cm.iterrows():
         for col_name, value in row.iteritems():
             if value >= int(min_val):
-                outfile.write(col_name + "\t" + row_name + "\t" + str(value)
-                    + "\n")
+                outfile.write(col_name + "\t" + row_name + "\t" + str(value) +
+                              "\n")
     outfile.close()
 
 
@@ -142,9 +142,9 @@ def main():
     cm_dir = sys.argv[1]
     out_dir = sys.argv[2]
     if not os.path.exists(out_dir):
-        print "Creating " + out_dir
         os.makedirs(out_dir)
-    min_val = 0 
+        print "Created " + out_dir
+    min_val = 0
     if (len(sys.argv) > 3):
         min_val = sys.argv[3]
     cm_file_list = get_file_list(cm_dir, "-CM.csv")
